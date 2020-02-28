@@ -11,106 +11,114 @@ public class PlacaAquecimento {
 		
 		int tam = Integer.parseInt(JOptionPane.showInputDialog(null, "Qual o tamanho da matriz?: "));
 		
-		double [][] matriz = new double [tam][tam];
-		double [][] copia_matriz = new double [tam][tam];
-		setar_bordas(matriz);
-		setar_interno(matriz);
+		double [][] matriz_original = new double [tam][tam];
+		double [][] matriz_alterada = new double [tam][tam];
+		
+		setar_bordas(matriz_original);
+		setar_interno(matriz_original);
 
-		//pra garantir que as funções tenham a mesma matriz
-		for (int i = 0; i < matriz.length; i++) {
-			for (int j = 0; j < matriz.length; j++) {
-				copia_matriz[i][j] = matriz[i][j];
+		for (int i = 0; i < matriz_original.length; i++) {
+			for (int j = 0; j < matriz_original.length; j++) {
+				matriz_alterada[i][j] = matriz_original[i][j];
 			}
 		}
 		
-		sem_thread(matriz);
-		com_thread(copia_matriz);
-	}
-
-
-	private static void com_thread(double[][] copia_matriz) {
-		
-		LocalTime antes = LocalTime.now();
-		//criar um método diferente para servir para a thread
-		realizar_operacao(copia_matriz);
-		
-		LocalTime depois = LocalTime.now();
-		imprimir(copia_matriz);
-
-		long duracao = ChronoUnit.MILLIS.between(antes, depois);
-		
-		System.out.println("O processo sem thread durou: " + duracao);
-	}
-
-
-	private static void sem_thread(double[][] matriz) {
-		
 		LocalTime antes = LocalTime.now();
 		
-		realizar_operacao(matriz);
+		realizar_operacao_sem_thread(matriz_original, matriz_alterada);
 		
 		LocalTime depois = LocalTime.now();
-		imprimir(matriz);
 
-		long duracao = ChronoUnit.MILLIS.between(antes, depois);
+		long duracao_milli = ChronoUnit.MILLIS.between(antes, depois);
+		long duracao_segundos= ChronoUnit.SECONDS.between(antes, depois);
+		long duracao_minutos= ChronoUnit.MINUTES.between(antes, depois);
+		System.out.print("O processo sem thread durou: " + duracao_minutos + " minutos, ");
+		System.out.print(duracao_segundos + " segundos e ");
+		System.out.println(duracao_milli + " millisegundos");
 		
-		System.out.println("O processo sem thread durou: " + duracao);
 	}
 
-	private static void realizar_operacao(double[][] matriz) {
+	private static void realizar_operacao_sem_thread(double matriz_original [][], double matriz_alterada [][]) {
+		//isso aqui da bug
+		double menor = 100;
 		
-		for (int i = 1; i < matriz.length-1; i++) {
-			for (int j = 1; j < matriz.length-1; j++) {
+		while (menor < 500) {
+			for (int i = 1; i < matriz_original.length-1; i++) {
 				
-				double diagonal_superior_esquerda = matriz[i-1][j-1];
-				double esquerda = matriz[i][j-1];
-				double diagonal_inferior_esquerda = matriz[i+1][j-1];
-				double baixo = matriz[i+1][j];
-				double diagonal_inferior_direita = matriz[i+1][j+1];
-				double direita = matriz[i][j+1];
-				double diagonal_superior_direita = matriz[i-1][j+1];
-				double cima = matriz[i-1][j];
 				
-				//matriz[i][j] = não lembro o que eu faço com os vizinhos para colocar aqui
-				
+				for (int j = 1; j < matriz_original.length-1; j++) {
+					
+					double cima = matriz_alterada[i][j-1];
+					double baixo = matriz_alterada[i][j+1];
+					double esquerda = matriz_alterada[i-1][j];
+					double direita = matriz_alterada[i+1][j];
+					
+					
+					matriz_alterada [i][j] = (esquerda + direita + baixo + cima  + matriz_alterada[i][j])/5;
+					
+					menor = verifica_menor(matriz_alterada, matriz_alterada[i][j]);
+					System.out.println(menor);
+					
+					if (menor >= 500) {
+
+						
+						break;
+					}
+				}
+				if (menor >= 500) {
+					
+					break;
+				}
 			}
 		}
 		
 	}
 
-	private static void setar_interno(double[][] matriz) {
+	private static double verifica_menor(double matriz_alterada [][], double menor) {
+		for (int i = 0; i < matriz_alterada.length; i++) {
+			for (int j = 0; j < matriz_alterada.length; j++) {
+				if (matriz_alterada[i][j] < menor) {
+					menor = matriz_alterada[i][j];
+				}
+			}
+		}
+		return menor;
+		
+	}
+
+	private static void setar_interno(double matriz_original [][]) {
 		
 		Random gerador = new Random(); 
-		for (int i = 1; i < matriz.length-1; i++) {
-			for (int j = 1; j < matriz.length-1; j++) {
-				matriz [i][j] = gerador.nextInt(30) + gerador.nextDouble();
+		for (int i = 1; i < matriz_original.length-1; i++) {
+			for (int j = 1; j < matriz_original.length-1; j++) {
+				matriz_original [i][j] = gerador.nextInt(100) + gerador.nextDouble();
 			}
 		}
 	}
 
-	private static void imprimir(double[][] matriz) {
+	private static void imprimir(double matriz_original [][]) {
 		
 		DecimalFormat milhar = new DecimalFormat("0000.00");
 		DecimalFormat centena = new DecimalFormat("000.00");
 		DecimalFormat dezena = new DecimalFormat("00.00");
 		DecimalFormat unidade = new DecimalFormat("0.00");
 		
-		for (int i = 0; i < matriz.length; i++) {
-			for (int j = 0; j < matriz.length; j++) {
-				if (matriz[i][j] >= 1000) {
-					System.out.print(milhar.format(matriz[i][j]));
+		for (int i = 0; i < matriz_original.length; i++) {
+			for (int j = 0; j < matriz_original.length; j++) {
+				if (matriz_original[i][j] >= 1000) {
+					System.out.print(milhar.format(matriz_original[i][j]));
 					System.out.print("\t\t");
 				}
-				if (matriz[i][j] >= 100 && matriz[i][j] < 1000) {
-					System.out.print(centena.format(matriz[i][j]));
+				if (matriz_original[i][j] >= 100 && matriz_original[i][j] < 1000) {
+					System.out.print(centena.format(matriz_original[i][j]));
 					System.out.print("\t\t");
 				}
-				if (matriz[i][j] >= 10 && matriz[i][j] < 100) {
-					System.out.print(dezena.format(matriz[i][j]));
+				if (matriz_original[i][j] >= 10 && matriz_original[i][j] < 100) {
+					System.out.print(dezena.format(matriz_original[i][j]));
 					System.out.print("\t\t");
 				}
-				if (matriz[i][j] > 1 && matriz[i][j] < 10) {
-					System.out.print(unidade.format(matriz[i][j]));
+				if (matriz_original[i][j] > 1 && matriz_original[i][j] < 10) {
+					System.out.print(unidade.format(matriz_original[i][j]));
 					System.out.print("\t\t");
 				}
 			}
@@ -119,14 +127,14 @@ public class PlacaAquecimento {
 		System.out.println("\n");
 	}
 
-	private static void setar_bordas(double matriz[][]) {
+	private static void setar_bordas(double matriz_original[][]) {
 		
-		for (int i = 0; i < matriz.length; i++) {
+		for (int i = 0; i < matriz_original.length; i++) {
 			
-			matriz [0][i] = 1000;
-			matriz [i][0] = 1000;
-			matriz [matriz.length-1][i] = 1000;
-			matriz [i][matriz.length-1] = 1000;
+			matriz_original [0][i] = 1000;
+			matriz_original [i][0] = 1000;
+			matriz_original [matriz_original.length-1][i] = 1000;
+			matriz_original [i][matriz_original.length-1] = 1000;
 		}
 	}
 	
