@@ -28,6 +28,9 @@ public class PlacaAquecimento {
 		realizar_operacao_sem_thread(matriz_original, matriz_alterada);
 		
 		LocalTime depois = LocalTime.now();
+		System.out.println();
+		imprimir(matriz_alterada);
+		imprimir(matriz_original);
 
 		long duracao_milli = ChronoUnit.MILLIS.between(antes, depois);
 		long duracao_segundos= ChronoUnit.SECONDS.between(antes, depois);
@@ -45,14 +48,12 @@ public class PlacaAquecimento {
 		while (menor < 500) {
 			for (int i = 1; i < matriz_original.length-1; i++) {
 				
-				
 				for (int j = 1; j < matriz_original.length-1; j++) {
 					
-					double cima = matriz_alterada[i][j-1];
-					double baixo = matriz_alterada[i][j+1];
-					double esquerda = matriz_alterada[i-1][j];
-					double direita = matriz_alterada[i+1][j];
-					
+					double cima = matriz_original[i][j-1];
+					double baixo = matriz_original[i][j+1];
+					double esquerda = matriz_original[i-1][j];
+					double direita = matriz_original[i+1][j];
 					
 					matriz_alterada [i][j] = (esquerda + direita + baixo + cima  + matriz_alterada[i][j])/5;
 					
@@ -60,7 +61,6 @@ public class PlacaAquecimento {
 					System.out.println(menor);
 					
 					if (menor >= 500) {
-
 						
 						break;
 					}
@@ -70,8 +70,13 @@ public class PlacaAquecimento {
 					break;
 				}
 			}
+			for (int i = 1; i < matriz_original.length - 1; i++) {
+				  for (int j = 1; j < matriz_original.length - 1; j++) {
+				   matriz_original[i][j] = matriz_alterada[i][j];
+				   
+				  }
+			}
 		}
-		
 	}
 
 	private static double verifica_menor(double matriz_alterada [][], double menor) {
