@@ -6,13 +6,14 @@ import java.util.Random;
 
 public class PlacaAquecimentoSemThread {
 
+	static double [][] matriz_original;
+	static double [][] matriz_alterada;
+	
 	public PlacaAquecimentoSemThread(int tam){
-		
-		double [][] matriz_original = new double [tam][tam];
-		double [][] matriz_alterada = new double [tam][tam];
-		
-		setar_bordas(matriz_original);
-		setar_interno(matriz_original);
+		matriz_original = new double [tam][tam];
+		matriz_alterada = new double [tam][tam];
+		setar_bordas();
+		setar_interno();
 
 		for (int i = 0; i < matriz_original.length; i++) {
 			for (int j = 0; j < matriz_original.length; j++) {
@@ -22,12 +23,11 @@ public class PlacaAquecimentoSemThread {
 		
 		LocalTime antes = LocalTime.now();
 		
-		realizar_operacao_sem_thread(matriz_original, matriz_alterada);
+		realizar_operacao();
 		
 		LocalTime depois = LocalTime.now();
 		System.out.println();
-		imprimir(matriz_alterada);
-		imprimir(matriz_original);
+		imprimir();
 
 		long duracao_milli = ChronoUnit.MILLIS.between(antes, depois);
 		long duracao_segundos= ChronoUnit.SECONDS.between(antes, depois);
@@ -38,7 +38,7 @@ public class PlacaAquecimentoSemThread {
 		
 	}
 
-	private static void realizar_operacao_sem_thread(double matriz_original [][], double matriz_alterada [][]) {
+	private static void realizar_operacao() {
 		//isso aqui da bug
 		double menor = 100;
 		
@@ -54,8 +54,7 @@ public class PlacaAquecimentoSemThread {
 					
 					matriz_alterada [i][j] = (esquerda + direita + baixo + cima  + matriz_alterada[i][j])/5;
 					
-					menor = verifica_menor(matriz_alterada, matriz_alterada[i][j]);
-					System.out.println(menor);
+					menor = verifica_menor(matriz_alterada[i][j]);
 					
 					if (menor >= 500) {
 						
@@ -76,7 +75,7 @@ public class PlacaAquecimentoSemThread {
 		}
 	}
 
-	private static double verifica_menor(double matriz_alterada [][], double menor) {
+	private static double verifica_menor(double menor) {
 		for (int i = 0; i < matriz_alterada.length; i++) {
 			for (int j = 0; j < matriz_alterada.length; j++) {
 				if (matriz_alterada[i][j] < menor) {
@@ -88,7 +87,7 @@ public class PlacaAquecimentoSemThread {
 		
 	}
 
-	private static void setar_interno(double matriz_original [][]) {
+	private static void setar_interno() {
 		
 		Random gerador = new Random(); 
 		for (int i = 1; i < matriz_original.length-1; i++) {
@@ -98,7 +97,7 @@ public class PlacaAquecimentoSemThread {
 		}
 	}
 
-	private static void imprimir(double matriz_original [][]) {
+	private static void imprimir() {
 		
 		DecimalFormat milhar = new DecimalFormat("0000.00");
 		DecimalFormat centena = new DecimalFormat("000.00");
@@ -129,7 +128,7 @@ public class PlacaAquecimentoSemThread {
 		System.out.println("\n");
 	}
 
-	private static void setar_bordas(double matriz_original[][]) {
+	private static void setar_bordas() {
 		
 		for (int i = 0; i < matriz_original.length; i++) {
 			
