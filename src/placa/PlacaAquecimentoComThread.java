@@ -14,6 +14,7 @@ public class PlacaAquecimentoComThread implements Runnable{
 	static int fim;
 	static int flag = 0;
 	
+	
 	public PlacaAquecimentoComThread () {
 		
 	}
@@ -29,7 +30,7 @@ public class PlacaAquecimentoComThread implements Runnable{
 			}
 		}
 		
-		Runnable runnable = this;
+		Runnable runnable = new PlacaAquecimentoComThread();
 		
 		LocalTime antes = LocalTime.now();
 		
@@ -38,12 +39,10 @@ public class PlacaAquecimentoComThread implements Runnable{
 		Thread thread1 = new Thread(runnable);
 		thread1.start();
 
-		System.out.println(Thread.currentThread().getName() + inicio);
 		inicio = tam/2;
 		fim = tam;
 		Thread thread2 = new Thread(runnable);
 		thread2.start();
-		System.out.println(Thread.currentThread().getName() + inicio);
 		
 		LocalTime depois = LocalTime.now();
 		System.out.println();
@@ -58,11 +57,12 @@ public class PlacaAquecimentoComThread implements Runnable{
 		
 	}
 
-	private static double verifica_menor(double menor) {
-		for (int i = 0; i < matriz_alterada.length; i++) {
-			for (int j = 0; j < matriz_alterada.length; j++) {
+	private static double verifica_menor(double menor, int finale) {
+		for (int i = 0; i < finale; i++) {
+			for (int j = 0; j < finale; j++) {
 				if (matriz_alterada[i][j] < menor) {
 					menor = matriz_alterada[i][j];
+					
 				}
 			}
 		}
@@ -124,55 +124,49 @@ public class PlacaAquecimentoComThread implements Runnable{
 
 	@Override
 	public void run() {
-
+		
+		int ini = inicio;
+		int finale = fim;
+		
 		double menor = 100;
 		
 		while (menor < 500) {
-			while (inicio < fim-1) {
+			
+			while (ini < finale-1) {
 				for (int j = 1; j < matriz_original.length-1; j++) {
 					
-					double cima = matriz_original[inicio][j-1];
-					double baixo = matriz_original[inicio][j+1];
-					double esquerda = matriz_original[inicio-1][j];
-					double direita = matriz_original[inicio+1][j];
+					System.out.println(menor);
+					double cima = matriz_original[ini][j-1];
+					double baixo = matriz_original[ini][j+1];
+					double esquerda = matriz_original[ini-1][j];
+					double direita = matriz_original[ini+1][j];
 					
-					matriz_alterada [inicio][j] = (esquerda + direita + baixo + cima  + matriz_alterada[inicio][j])/5;
+					matriz_alterada [ini][j] = (esquerda + direita + baixo + cima  + matriz_original[ini][j])/5;
 					
-					menor = verifica_menor(matriz_alterada[inicio][j]);
+					menor = verifica_menor(menor, finale);
 					
 					if (menor >= 500) {
-						
+				
 						break;
 					}
 				}
-
+				
 				inicio++;
+				flag++;
+				
+				if (flag % 2 == 0) {
+					for (int i = 1; i < matriz_alterada.length; i++) {
+						for (int j = 1; j < matriz_alterada.length; j++) {
+							matriz_original[i][j] = matriz_alterada[i][j];
+						}
+					}
+				}
 				if (menor >= 500) {
 					
 					break;
 				}
+				
 			}
-			flag+=1;
-			synchronized (trava) {
-				if (flag % 2 == 0) {
-					for (int i = 1; i < matriz_original.length - 1; i++) {
-						  for (int j = 1; j < matriz_original.length - 1; j++) {
-						   matriz_original[i][j] = matriz_alterada[i][j];
-						   
-						  }
-					}
-					//a exception acontece aqui
-					notify();
-				}
-				else {
-					try {
-						trava.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-			
 		}
 		
 	}
